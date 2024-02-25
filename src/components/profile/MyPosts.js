@@ -4,7 +4,7 @@ import { ITEMS_PER_PAGE } from "../../constants"
 import Posts from "../home/Posts"
 import { getDataAPI } from "../../utils/fetchData"
 
-const MyPosts = ({ auth, id, dispatch, profile }) => {
+const MyPosts = ({ auth, id, dispatch }) => {
   const [posts, setPosts] = useState([])
   const [count, setCount] = useState(0)
   const [page, setPage] = useState(1)
@@ -18,10 +18,9 @@ const MyPosts = ({ auth, id, dispatch, profile }) => {
       `users/${id}/posts?limit=${ITEMS_PER_PAGE}&&page=${page}`,
       auth.token
     )
-    const newData = { ...res.data, page: page + 1, _id: id }
     if (!mountedRef.current) return null;
-    setPosts((prevPosts) => [...newData?.posts])
-    setCount(() => newData?.count)
+    setPosts(() => [...res.data?.posts])
+    setCount(() => res.data?.count)
     setPage((prevPage) => prevPage + 1)
     setLoading(() => false)
   }, [page, dispatch, auth.token, loading, id])
