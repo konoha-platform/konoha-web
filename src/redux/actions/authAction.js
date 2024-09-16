@@ -3,11 +3,12 @@ import Cookies from 'js-cookie'
 import { GLOBALTYPES } from './globalTypes'
 import { getDataAPI, postDataAPI } from '../../utils/fetchData'
 import valid from '../../utils/valid'
-import { mapMessages } from '../../utils/mapMessages'
+import { mapMessages, messages } from '../../utils/mapMessages'
 
 const TOKEN_LIFESPAN = 7 //days
 export const AUTH_TYPES = {
   AUTHENTICATED: 'AUTHENTICATED',
+  AUTO_LOGIN: 'AUTO_LOGIN',
 }
 
 export const login = (data) => async (dispatch) => {
@@ -59,9 +60,10 @@ export const initialize = () => async (dispatch) => {
 }
 
 export const autoLogin = () => async (dispatch, getState) => {
+  const alertState = getState().alert
+  if (!!alertState.loading) return
+  
   try {
-    const alertState = getState().alert
-    if (!!alertState.loading) return
 
     dispatch({ type: GLOBALTYPES.ALERT, payload: { loading: true } })
     const refreshToken = Cookies.get('refresh_token')
@@ -81,10 +83,13 @@ export const autoLogin = () => async (dispatch, getState) => {
     dispatch({
       type: GLOBALTYPES.ALERT,
       payload: {
-        error: mapMessages(err.response.data.msg),
+        error: mapMessages(messages.SESSION_EXPIRED),
         loading: false
       },
     })
+    setTimeout(() => {
+      dispatch(logout())
+    }, 1000)
   }
 }
 
